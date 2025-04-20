@@ -22,19 +22,6 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true, useUnifiedTop
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error(err));
 
-  // OAuth 2.0 Setup
-// const oauth2Client = new OAuth2Client(
-//     process.env.GOOGLE_CLIENT_ID,
-//     process.env.GOOGLE_CLIENT_SECRET,
-//     'http://localhost:5000/auth/callback' // Replace with your redirect URI
-//   );
-
-// // YouTube API setup
-//  const youtube = google.youtube({
-//   version: 'v3',
-//   auth: oauth2Client,
-// //   auth: process.env.YOUTUBE_API_KEY,
-// });
 
 
 // Routes
