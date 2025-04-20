@@ -5,7 +5,7 @@ require('dotenv').config();
 const oauth2Client = new OAuth2Client(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  'http://localhost:5000/auth/callback'
+  'https://youtube-video-dashboard.vercel.app/auth/callback'
 );
 
 const youtube = google.youtube({
