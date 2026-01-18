@@ -12,10 +12,24 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
+// Setup CORS with environment variables
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.CLIENT_URL?.replace(/\/$/, ''), // Remove trailing slash if present
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'https://youtube-video-dashboard.vercel.app'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl requests)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, true); // In production, be more restrictive
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   })
@@ -26,7 +40,9 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // Set to true in production with HTTPS
+    secure: process.env.NODE_ENV === 'production', // HTTPS in production
+    httpOnly: true,
+    sameSite: 'lax', // Allow cross-origin cookies
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
@@ -38,7 +54,7 @@ app.use(passport.session());
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: "/auth/google/callback"
+  callbackURL: process.env.GOOGLE_CALLBACK_URL || "/auth/google/callback"
 }, async (accessToken, refreshToken, profile, done) => {
   // Store user data and tokens
   const user = {
@@ -80,10 +96,26 @@ app.get('/auth/failure', (req, res) => {
   res.status(401).json({ error: 'Authentication failed' });
 });
 
-app.get('/auth/logout', (req, res) => {
+app.post('/auth/logout', (req, res) => {
   req.logout((err) => {
     if (err) return res.status(500).json({ error: 'Logout failed' });
-    res.json({ message: 'Logged out successfully' });
+    req.session.destroy((err) => {
+      if (err) return res.status(500).json({ error: 'Session destruction failed' });
+      res.clearCookie('connect.sid'); // Clear session cookie
+      res.json({ message: 'Logged out successfully' });
+    });
+  });
+});
+
+// Alias for API path compatibility
+app.post('/api/auth/logout', (req, res) => {
+  req.logout((err) => {
+    if (err) return res.status(500).json({ error: 'Logout failed' });
+    req.session.destroy((err) => {
+      if (err) return res.status(500).json({ error: 'Session destruction failed' });
+      res.clearCookie('connect.sid');
+      res.json({ message: 'Logged out successfully' });
+    });
   });
 });
 
