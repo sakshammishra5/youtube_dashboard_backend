@@ -14,8 +14,7 @@ app.use(express.json());
 
 // Setup CORS with environment variables
 const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
+  'http://localhost:5173',,
   process.env.CLIENT_URL?.replace(/\/$/, ''), // Remove trailing slash if present
 ].filter(Boolean);
 
