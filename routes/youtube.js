@@ -162,21 +162,26 @@ router.delete("/comment/:commentId", requireAuth, async (req, res) => {
   try {
     const youtube = getYoutubeClient(req.user.accessToken);
 
-    await youtube.comments.delete({
+    console.log(`Attempting to delete comment: ${commentId}`);
+    
+    const result = await youtube.comments.delete({
       id: commentId,
     });
 
+    console.log(`Successfully deleted comment: ${commentId}`);
+    
     await logEvent("COMMENT_DELETE", `Deleted comment: ${commentId}`);
     return res.json({ success: true, message: "Comment deleted" });
   } catch (err) {
     console.log("COMMENT DELETE ERROR:", err?.response?.data || err.message);
+    console.log("Full error:", err);
 
     await logEvent(
       "ERROR",
       `Failed to delete comment: ${err?.response?.data?.error?.message || err.message}`
     );
 
-    return res.status(err.code || 500).json({
+    return res.status(err?.response?.status || err.code || 500).json({
       error: err?.response?.data?.error?.message || err.message,
       details: err?.response?.data || null,
     });
