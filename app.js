@@ -69,13 +69,7 @@ passport.deserializeUser((user, done) => {
 // Auth Routes
 app.get('/auth/google',
   passport.authenticate('google', {
-    scope: [
-      'profile',
-      'email',
-      'https://www.googleapis.com/auth/youtube.force-ssl',
-      'https://www.googleapis.com/auth/youtube',
-      'https://www.googleapis.com/auth/youtube.manage-video-uploads'
-    ]
+    scope: ['profile', 'email',"https://www.googleapis.com/auth/youtube.force-ssl", 'https://www.googleapis.com/auth/youtube']
   })
 );
 
