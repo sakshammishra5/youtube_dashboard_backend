@@ -14,35 +14,27 @@ app.use(express.json());
 
 // Setup CORS with environment variables
 const allowedOrigins = [
-  'http://localhost:5173',,
-  process.env.CLIENT_URL?.replace(/\/$/, ''), // Remove trailing slash if present
-].filter(Boolean);
+  "http://localhost:5173",
+  "https://youtube-video-dashboard.vercel.app",
+];
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (mobile apps, curl requests)
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(null, true); // In production, be more restrictive
-      }
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
-  })
-);
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+}));
+
+app.set("trust proxy", 1); // IMPORTANT for Render/Proxy
 
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // HTTPS in production
+    secure: true,          // must be true on https
     httpOnly: true,
-    sameSite: 'lax', // Allow cross-origin cookies
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    sameSite: "none",      // must be none for cross-site
+    maxAge: 24 * 60 * 60 * 1000
   }
 }));
 
